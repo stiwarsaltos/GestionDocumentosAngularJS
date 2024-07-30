@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html ng-app="WebApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Manejo de Documentos AngularJS</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <style>
+        .modal-body table th, .modal-body table td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body ng-controller="DocumentController">
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Gestión de Documentos AngularJS</h1>
+            <button class="btn btn-primary" ng-click="openNewDocumentModal()">Nuevo</button>
+            <div class="pull-right">
+                <input type="text" class="form-control" placeholder="BUSCAR" ng-model="searchText">
+                <button class="btn btn-default" ng-click="exportToExcel()">EXCEL</button>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>FECHA</th>
+                    <th>NÚMERO</th>
+                    <th>CLIENTE</th>
+                    <th>CANTIDAD DE PRODUCTO</th>
+                    <th>TOTAL</th>
+                    <th>BOTONES</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="doc in documents | filter:searchText">
+                    <td>{{doc.fecha}}</td>
+                    <td>{{doc.numero}}</td>
+                    <td>{{doc.cliente}}</td>
+                    <td>{{doc.cantidadProductos}}</td>
+                    <td>{{doc.total}}</td>
+                    <td>
+                        <button class="btn btn-warning" ng-click="editDocument(doc)">Editar</button>
+                        <button class="btn btn-danger" ng-click="deleteDocument(doc)">Eliminar</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1" role="dialog" aria-labelledby="documentModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="documentModalLabel">Nuevo Documento</h4>
+            </div>
+            <div class="modal-body">
+                <form name="documentForm">
+                    <div class="form-group">
+                        <label for="fecha">FECHA</label>
+                        <input type="date" class="form-control" id="fecha" ng-model="newDocument.fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="numero">NÚMERO</label>
+                        <input type="text" class="form-control" id="numero" ng-model="newDocument.numero" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente">CLIENTE</label>
+                        <input type="text" class="form-control" id="cliente" ng-model="newDocument.cliente" required>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NOMBRE</th>
+                            <th>CANTIDAD</th>
+                            <th>PRECIO UNITARIO</th>
+                            <th>TOTAL</th>
+                            <th>ELIMINAR</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="product in newDocument.products">
+                            <td><input type="text" class="form-control" ng-model="product.id" required></td>
+                            <td><input type="text" class="form-control" ng-model="product.nombre" required></td>
+                            <td><input type="number" class="form-control" ng-model="product.cantidad" ng-change="updateTotal(product)" required></td>
+                            <td><input type="number" class="form-control" ng-model="product.precioUnitario" ng-change="updateTotal(product)" required></td>
+                            <td>{{product.total}}</td>
+                            <td><button class="btn btn-danger" ng-click="removeProduct(product)">Eliminar</button></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div>
+                        <button type="button" class="btn btn-default" ng-click="addProduct()">Añadir Producto</button>
+                    </div>
+                    <div>
+                        <strong>Total: {{getTotal(newDocument.products)}}</strong>
+                    </div>
+                    <button type="button" class="btn btn-primary" ng-click="saveDocument()" ng-disabled="documentForm.$invalid || newDocument.products.length == 0">Guardar</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.20/angular.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.12.0/underscore-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+<script src="controllers/controller.js"></script>
+</body>
+</html>
