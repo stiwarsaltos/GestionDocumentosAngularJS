@@ -2,115 +2,144 @@
 <html ng-app="WebApp">
 <head>
     <meta charset="UTF-8">
-    <title>Manejo de Documentos AngularJS</title>
+    <title>Document Management</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <style>
         .modal-body table th, .modal-body table td {
             text-align: center;
         }
+        .loader {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body ng-controller="DocumentController">
 <div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>Gestión de Documentos AngularJS</h1>
-            <button class="btn btn-primary" ng-click="openNewDocumentModal()">Nuevo</button>
-            <div class="pull-right">
-                <input type="text" class="form-control" placeholder="BUSCAR" ng-model="searchText">
-                <button class="btn btn-default" ng-click="exportToExcel()">EXCEL</button>
-            </div>
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>FECHA</th>
-                    <th>NÚMERO</th>
-                    <th>CLIENTE</th>
-                    <th>CANTIDAD DE PRODUCTO</th>
-                    <th>TOTAL</th>
-                    <th>BOTONES</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="doc in documents | filter:searchText">
-                    <td>{{doc.fecha}}</td>
-                    <td>{{doc.numero}}</td>
-                    <td>{{doc.cliente}}</td>
-                    <td>{{doc.cantidadProductos}}</td>
-                    <td>{{doc.total}}</td>
-                    <td>
-                        <button class="btn btn-warning" ng-click="editDocument(doc)">Editar</button>
-                        <button class="btn btn-danger" ng-click="deleteDocument(doc)">Eliminar</button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+    <h2>Document Management</h2>
+    <div class="form-inline">
+        <input type="text" class="form-control" ng-model="searchText" placeholder="Search...">
+        <button class="btn btn-primary" ng-click="openNewDocumentModal()">New Document</button>
+        <button class="btn btn-success" ng-click="exportToExcel()">Download Excel</button>
     </div>
-</div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Number</th>
+            <th>Client</th>
+            <th>Products</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="doc in docs | filter:searchText">
+            <td>{{doc.date}}</td>
+            <td>{{doc.number}}</td>
+            <td>{{doc.client}}</td>
+            <td>{{doc.quantityProducts}}</td>
+            <td>{{doc.total | currency}}</td>
+            <td>
+                <button class="btn btn-info" ng-click="editDocument(doc)">Edit</button>
+                <button class="btn btn-danger" ng-click="deleteDocument(doc)">Delete</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
-<!-- Modal -->
-<div class="modal fade" id="documentModal" tabindex="-1" role="dialog" aria-labelledby="documentModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="documentModalLabel">Nuevo Documento</h4>
-            </div>
-            <div class="modal-body">
-                <form name="documentForm">
-                    <div class="form-group">
-                        <label for="fecha">FECHA</label>
-                        <input type="date" class="form-control" id="fecha" ng-model="newDocument.fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="numero">NÚMERO</label>
-                        <input type="text" class="form-control" id="numero" ng-model="newDocument.numero" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cliente">CLIENTE</label>
-                        <input type="text" class="form-control" id="cliente" ng-model="newDocument.cliente" required>
-                    </div>
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>NOMBRE</th>
-                            <th>CANTIDAD</th>
-                            <th>PRECIO UNITARIO</th>
-                            <th>TOTAL</th>
-                            <th>ELIMINAR</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="product in newDocument.products">
-                            <td><input type="text" class="form-control" ng-model="product.id" required></td>
-                            <td><input type="text" class="form-control" ng-model="product.nombre" required></td>
-                            <td><input type="number" class="form-control" ng-model="product.cantidad" ng-change="updateTotal(product)" required></td>
-                            <td><input type="number" class="form-control" ng-model="product.precioUnitario" ng-change="updateTotal(product)" required></td>
-                            <td>{{product.total}}</td>
-                            <td><button class="btn btn-danger" ng-click="removeProduct(product)">Eliminar</button></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <div>
-                        <button type="button" class="btn btn-default" ng-click="addProduct()">Añadir Producto</button>
-                    </div>
-                    <div>
-                        <strong>Total: {{getTotal(newDocument.products)}}</strong>
-                    </div>
-                    <button type="button" class="btn btn-primary" ng-click="saveDocument()" ng-disabled="documentForm.$invalid || newDocument.products.length == 0">Guardar</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                </form>
+    <div id="documentModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Document</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form name="documentForm">
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" class="form-control" ng-model="newDocument.date">
+                        </div>
+                        <div class="form-group">
+                            <label for="number">Number</label>
+                            <input type="text" class="form-control" ng-model="newDocument.number" ng-blur="formatNumber()">
+                        </div>
+                        <div class="form-group">
+                            <label for="client">Client</label>
+                            <input type="text" class="form-control" ng-model="newDocument.client">
+                        </div>
+                        <h4>Products</h4>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="product in newDocument.products">
+                                <td><input type="text" ng-model="product.id" class="form-control"></td>
+                                <td><input type="text" ng-model="product.name" class="form-control"></td>
+                                <td><input type="number" ng-model="product.quantity" class="form-control" min="0" ng-change="updateTotal(product)"></td>
+                                <td><input type="number" ng-model="product.unitPrice" class="form-control" min="0" ng-change="updateTotal(product)"></td>
+                                <td>{{product.total | currency}}</td>
+                                <td><button class="btn btn-danger" ng-click="removeProduct(product)">Remove</button></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-success" ng-click="addProduct()">Add Product</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" ng-click="saveDocument()">Save</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.20/angular.min.js"></script>
-<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+<div ng-show="isLoading" class="loader"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.12.0/underscore-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.6/xlsx.full.min.js"></script>
 <script src="controllers/controller.js"></script>
+<script src="controllers/modalController.js"></script>
+
+<script>
+    function showPushNotification(title, body) {
+        if (!("Notification" in window)) {
+            console.error("This browser does not support desktop notification");
+        } else if (Notification.permission === "granted") {
+            var notification = new Notification(title, { body: body });
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(function(permission) {
+                if (permission === "granted") {
+                    var notification = new Notification(title, { body: body });
+                }
+            });
+        }
+    }
+</script>
 </body>
 </html>

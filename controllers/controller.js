@@ -1,5 +1,5 @@
 angular.module('WebApp', []).controller('DocumentController', function($scope) {
-    $scope.documents = [];
+    $scope.docs = [];
     $scope.newDocument = { products: [] };
 
     $scope.openNewDocumentModal = function() {
@@ -8,37 +8,57 @@ angular.module('WebApp', []).controller('DocumentController', function($scope) {
     };
 
     $scope.updateTotal = function(product) {
-        product.total = product.cantidad * product.precioUnitario;
+        product.total = product.quantity * product.unitPrice;
     };
 
     $scope.getTotal = function(products) {
-        return products.reduce((sum, product) => sum + (product.cantidad * product.precioUnitario), 0);
+        return products.reduce((sum, product) => sum + (product.quantity * product.unitPrice), 0);
     };
 
     $scope.addProduct = function() {
         $scope.newDocument.products.push({
             id: '',
-            nombre: '',
-            cantidad: 0,
-            precioUnitario: 0,
+            name: '',
+            quantity: 0,
+            unitPrice: 0,
             total: 0
         });
     };
 
     $scope.saveDocument = function() {
-        if ($scope.documents.find(doc => doc.numero === $scope.newDocument.numero)) {
-            alert('El número de documento ya existe');
-            return;
+        var index = $scope.docs.findIndex(doc => doc.number === $scope.newDocument.number);
+        if (index !== -1) {
+            $scope.docs[index] = {
+                date: $scope.newDocument.date,
+                number: $scope.newDocument.number,
+                client: $scope.newDocument.client,
+                quantityProducts: $scope.newDocument.products.length,
+                total: $scope.getTotal($scope.newDocument.products),
+                products: angular.copy($scope.newDocument.products)
+            };
+        } else {
+            $scope.docs.push({
+                date: $scope.newDocument.date,
+                number: $scope.newDocument.number,
+                client: $scope.newDocument.client,
+                quantityProducts: $scope.newDocument.products.length,
+                total: $scope.getTotal($scope.newDocument.products),
+                products: angular.copy($scope.newDocument.products)
+            });
         }
-        $scope.documents.push({
-            fecha: $scope.newDocument.fecha,
-            numero: $scope.newDocument.numero,
-            cliente: $scope.newDocument.cliente,
-            cantidadProductos: $scope.newDocument.products.length,
-            total: $scope.getTotal($scope.newDocument.products),
-            products: angular.copy($scope.newDocument.products)
-        });
         $('#documentModal').modal('hide');
+    };
+
+    $scope.deleteDocument = function(doc) {
+        var index = $scope.docs.indexOf(doc);
+        if (index !== -1) {
+            $scope.docs.splice(index, 1);
+        }
+    };
+
+    $scope.editDocument = function(doc) {
+        $scope.newDocument = angular.copy(doc);
+        $('#documentModal').modal('show');
     };
 
     $scope.removeProduct = function(product) {
@@ -48,28 +68,31 @@ angular.module('WebApp', []).controller('DocumentController', function($scope) {
         }
     };
 
-    $scope.editDocument = function(doc) {
-        $scope.newDocument = angular.copy(doc);
-        $('#documentModal').modal('show');
-    };
-
-    $scope.deleteDocument = function(doc) {
-        const index = $scope.documents.indexOf(doc);
-        if (index > -1) {
-            $scope.documents.splice(index, 1);
+    $scope.formatNumber = function() {
+        if ($scope.newDocument.number) {
+            // Limitar el número a 9 dígitos
+            $scope.newDocument.number = $scope.newDocument.number.slice(0, 9);
         }
     };
 
     $scope.exportToExcel = function() {
-        const wb = XLSX.utils.book_new();
-        const ws_data = [
-            ["FECHA", "NÚMERO", "CLIENTE", "CANTIDAD DE PRODUCTO", "TOTAL"]
-        ];
-        $scope.documents.forEach(doc => {
-            ws_data.push([doc.fecha, doc.numero, doc.cliente, doc.cantidadProductos, doc.total]);
+        var data = [];
+        var headers = ["Date", "Number", "Client", "Products", "Total"];
+        data.push(headers);
+
+        $scope.docs.forEach(function(doc) {
+            var row = [];
+            row.push(doc.date);
+            row.push(doc.number);
+            row.push(doc.client);
+            row.push(doc.quantityProducts);
+            row.push(doc.total);
+            data.push(row);
         });
-        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+        var ws = XLSX.utils.aoa_to_sheet(data);
+        var wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Documents");
-        XLSX.writeFile(wb, "Documents.xlsx");
+        XLSX.writeFile(wb, "documents.xlsx");
     };
 });
