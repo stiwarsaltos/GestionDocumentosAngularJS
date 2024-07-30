@@ -61,6 +61,7 @@
         </tbody>
     </table>
 
+<<<<<<< HEAD
     <div id="documentModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -112,6 +113,59 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" ng-click="saveDocument()">Save</button>
                 </div>
+=======
+<div class="modal fade" id="documentModal" tabindex="-1" role="dialog" aria-labelledby="documentModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="documentModalLabel">Nuevo Documento</h4>
+            </div>
+            <div class="modal-body">
+                <form name="documentForm">
+                    <div class="form-group">
+                        <label for="fecha">FECHA</label>
+                        <input type="date" class="form-control" id="fecha" ng-model="newDocument.fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="numero">NÚMERO</label>
+                        <input type="text" class="form-control" id="numero" ng-model="newDocument.numero" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente">CLIENTE</label>
+                        <input type="text" class="form-control" id="cliente" ng-model="newDocument.cliente" required>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NOMBRE</th>
+                            <th>CANTIDAD</th>
+                            <th>PRECIO UNITARIO</th>
+                            <th>TOTAL</th>
+                            <th>ELIMINAR</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="product in newDocument.products">
+                            <td><input type="text" class="form-control" ng-model="product.id" required></td>
+                            <td><input type="text" class="form-control" ng-model="product.nombre" required></td>
+                            <td><input type="number" class="form-control" ng-model="product.cantidad" ng-change="updateTotal(product)" required></td>
+                            <td><input type="number" class="form-control" ng-model="product.precioUnitario" ng-change="updateTotal(product)" required></td>
+                            <td>{{product.total}}</td>
+                            <td><button class="btn btn-danger" ng-click="removeProduct(product)">Eliminar</button></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div>
+                        <button type="button" class="btn btn-default" ng-click="addProduct()">Añadir Producto</button>
+                    </div>
+                    <div>
+                        <strong>Total: {{getTotal(newDocument.products)}}</strong>
+                    </div>
+                    <button type="button" class="btn btn-primary" ng-click="saveDocument()" ng-disabled="documentForm.$invalid || newDocument.products.length == 0">Guardar</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                </form>
+>>>>>>> 071ef67c5eb619d81c93bfd9b23a7de3db198a99
             </div>
         </div>
     </div>
