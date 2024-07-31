@@ -8,101 +8,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-toastr/2.1.0/angular-toastr.min.css">
 </head>
 <body>
-<div class="container" ng-controller="DocumentController">
-    <h2>Document Management</h2>
-    <div class="form-inline">
-        <input type="text" class="form-control" ng-model="searchText" placeholder="Search...">
-        <button class="btn btn-primary" ng-click="openNewDocumentModal()">New Document</button>
-        <button class="btn btn-success" ng-click="exportToExcel()">Download Excel</button>
-    </div>
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Number</th>
-            <th>Client</th>
-            <th>Products</th>
-            <th>Total</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="doc in docs | filter:searchText">
-            <td>{{doc.date}}</td>
-            <td>{{doc.num}}</td>
-            <td>{{doc.client}}</td>
-            <td>{{doc.quantityProducts}}</td>
-            <td>{{doc.total | currency}}</td>
-            <td>
-                <button class="btn btn-info" ng-click="editDocument(doc)">Edit</button>
-                <button class="btn btn-danger" ng-click="deleteDocument(doc)">Delete</button>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <div class="loader" ng-class="{'show': isLoading}"></div>
-</div>
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-sm-3 col-md-2 sidebar">
+            <h2>Menu</h2>
+            <ul class="nav nav-sidebar">
+                <li><a ui-sref="documents">Document Management</a></li>
+                <li><a ui-sref="customers">Customer Management</a></li>
+            </ul>
+        </nav>
 
-<div class="container-modal" ng-controller="ModalController">
-    <script type="text/ng-template" id="modalTemplate.html">
-        <div class="modal-header">
-            <h4 class="modal-title">Document</h4>
+        <div class="col-sm-9 col-md-10 main">
+            <div ui-view class="view-content"></div>
         </div>
-        <div class="modal-body">
-            <form name="documentForm">
-                <div class="form-group">
-                    <label for="date">Date</label>
-                    <input type="date" id="date" class="form-control" ng-model="newDocument.date">
-                </div>
-                <div class="form-group">
-                    <label for="num">Number</label>
-                    <input type="text" id="num" class="form-control"  ng-model="newDocument.num" ng-blur="formatNumOnBlur()" maxlength="9">
-                </div>
-                <div class="form-group">
-                    <label for="client">Client</label>
-                    <input type="text" id="client" class="form-control" ng-model="newDocument.client">
-                </div>
-                <h4>Products</h4>
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        <th>Total</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="product in newDocument.products">
-                        <td><input type="text" ng-model="product.id" class="form-control"></td>
-                        <td><input type="text" ng-model="product.name" class="form-control"></td>
-                        <td><input type="number" ng-model="product.quantity" class="form-control" min="0" ng-change="updateTotal(product)"></td>
-                        <td><input type="number" ng-model="product.unitPrice" class="form-control" min="0" ng-change="updateTotal(product)"></td>
-                        <td>{{product.total | currency}}</td>
-                        <td><button class="btn btn-danger" ng-click="removeProduct(product)">Remove</button></td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div>
-                    <button type="button" class="btn btn-success" ng-click="addProduct()">Add Product</button>
-                    <button type="button" class="close" ng-click="closeModal()">&times;</button>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" ng-click="closeModal()">Close</button>
-            <button type="button" class="btn btn-primary" ng-click="saveDocument()">Save</button>
-        </div>
-    </script>
+    </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.6/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-toastr/2.1.0/angular-toastr.tpls.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.4.2/angular-ui-router.min.js"></script>
 <script src="controllers/controller.js"></script>
+<script src="controllers/customerController.js"></script>
 <script src="controllers/modalController.js"></script>
 </body>
 </html>

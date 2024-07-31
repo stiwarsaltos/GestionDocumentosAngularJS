@@ -1,15 +1,27 @@
 angular.module('WebApp')
     .controller('ModalController', function($scope, $uibModalInstance, newDocument, toastr) {
-        $scope.newDocument = newDocument || {products: []};
+        $scope.newDocument = newDocument || { products: [] };
 
-        function formatNum(num){
+        function formatNum(num) {
             return String(num).padStart(9, '0');
         }
 
-        $scope.formatNumOnBlur = function (){
-            if($scope.newDocument.num){
+        $scope.formatNumOnBlur = function () {
+            if ($scope.newDocument.num) {
                 $scope.newDocument.num = formatNum($scope.newDocument.num);
             }
+        };
+
+        $scope.getTotalQuantity = function() {
+            return $scope.newDocument.products.reduce(function(sum, product) {
+                return sum + (product.quantity || 0);
+            }, 0);
+        };
+
+        $scope.getTotalAmount = function() {
+            return $scope.newDocument.products.reduce(function(sum, product) {
+                return sum + (product.total || 0);
+            }, 0);
         };
 
         $scope.closeModal = function() {
@@ -17,10 +29,29 @@ angular.module('WebApp')
         };
 
         $scope.saveDocument = function() {
+            // Validar productos
+            const hasEmptyProduct = $scope.newDocument.products.some(function(product) {
+                return !product.id || !product.name || !product.quantity || !product.unitPrice;
+            });
+            if (hasEmptyProduct) {
+                toastr.error('Products cannot have empty fields!');
+                return;
+            }
+
+            // Validar ID único
+            const ids = $scope.newDocument.products.map(function(product) {
+                return product.id;
+            });
+            const hasDuplicateId = ids.length !== new Set(ids).size;
+            if (hasDuplicateId) {
+                toastr.error('Product IDs must be unique!');
+                return;
+            }
+
             $scope.newDocument.quantityProducts = $scope.newDocument.products.length;
-            $scope.newDocument.total = $scope.newDocument.products.reduce((sum, product)=> sum + (product.total || 0), 0);
+            $scope.newDocument.total = $scope.getTotalAmount();
+
             $uibModalInstance.close($scope.newDocument);
-            toastr.success('Document saved successfully!');
         };
 
         $scope.addProduct = function() {
@@ -43,7 +74,7 @@ angular.module('WebApp')
             const index = $scope.newDocument.products.indexOf(product);
             if (index > -1) {
                 $scope.newDocument.products.splice(index, 1);
-                toastr.warning('Product Removed!');
+                toastr.warning('Product removed!');
             }
         };
     });

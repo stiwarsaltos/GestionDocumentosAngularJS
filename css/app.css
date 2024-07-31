@@ -1,23 +1,47 @@
-/* Loader styles */
 .loader {
     position: fixed;
-    left: 50%;
     top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    border: 16px solid #f3f3f3;
-    border-radius: 50%;
-    border-top: 16px solid #3498db;
-    width: 120px;
-    height: 120px;
-    animation: spin 1s linear infinite;
-    display: none; /* Initially hidden */
+    display: none;
 }
-
 .loader.show {
-    display: block; /* Show the loader */
+    display: block;
+}
+.sidebar {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-right: 1px solid #ddd;
+    height: 100vh;
+    overflow-y: auto;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.sidebar .nav {
+    margin-bottom: 20px;
+}
+
+.sidebar .nav li {
+    margin-bottom: 10px;
+}
+
+.sidebar .nav li a {
+    color: #333;
+    font-weight: 500;
+}
+
+.sidebar .nav li a:hover {
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+
+.main {
+    padding: 20px;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+.row {
+    margin: 0;
 }

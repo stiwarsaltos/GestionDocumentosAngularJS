@@ -1,11 +1,25 @@
-angular.module('WebApp', ['ui.bootstrap', 'toastr'])
+angular.module('WebApp', ['ui.bootstrap', 'toastr', 'ui.router'])
     .config(function(toastrConfig){
         angular.extend(toastrConfig, {
             positionClass: 'toast-bottom-right',
             timeOut: 3000,
             progressBar: true,
-            preventDuplicates: true
+            preventDuplicates: false
         });
+    })
+    .config(function($stateProvider, $urlRouterProvider) {
+        $stateProvider
+        .state('documents', {
+            url: '/documents',
+            templateUrl: 'views/documents.html',
+            controller: 'DocumentController',
+        })
+            .state('customers',{
+                url: '/customers',
+                templateUrl: 'views/customer.html',
+                controller: 'CustomerController',
+            });
+        $urlRouterProvider.otherwise('/documents');
     })
     .controller('DocumentController', function($scope, $uibModal, toastr) {
         $scope.docs = [];
@@ -32,12 +46,25 @@ angular.module('WebApp', ['ui.bootstrap', 'toastr'])
 
             modalInstance.result.then(function(updatedDocument) {
                 if (!updatedDocument.id) {
+                    var existingDoc = $scope.docs.find(doc => doc.num === updatedDocument.num);
+                    if (existingDoc) {
+                        toastr.error('Document number already exists!');
+                        $scope.isLoading = false;
+                        return;
+                    }
+
                     updatedDocument.id = generateId();
                     $scope.docs.push(updatedDocument);
                     toastr.success('Document created successfully!');
+                } else {
+                    var index = $scope.docs.findIndex(existingDoc => existingDoc.id === updatedDocument.id);
+                    if (index !== -1) {
+                        $scope.docs[index] = updatedDocument;
+                        toastr.success('Document updated successfully!');
+                    }
                 }
                 $scope.isLoading = false;
-            }, function(){
+            }, function() {
                 $scope.isLoading = false;
             });
         };
@@ -53,22 +80,21 @@ angular.module('WebApp', ['ui.bootstrap', 'toastr'])
                     }
                 }
             });
-                modalInstance.result.then(function(updatedDocument) {
-                    console.log('Updated document: ', updatedDocument);
-                    $scope.isLoading = true;
-                    var index = $scope.docs.findIndex(existingDoc => existingDoc.id === updatedDocument.id);
-                    console.log('Index in Docs: ', index);
-                    if(index !== -1){
-                        $scope.docs[index] = updatedDocument;
-                        toastr.success('Document updated successfully!');
-                    }
-                    $scope.isLoading = false;
-                })
+
+            modalInstance.result.then(function(updatedDocument) {
+                $scope.isLoading = true;
+                var index = $scope.docs.findIndex(existingDoc => existingDoc.id === updatedDocument.id);
+                if (index !== -1) {
+                    $scope.docs[index] = updatedDocument;
+                    toastr.success('Document updated successfully!');
+                }
+                $scope.isLoading = false;
+            });
         };
 
         $scope.deleteDocument = function(doc){
             $scope.isLoading = true;
-            var index = $scope.docs.findIndex(doc => doc.id === doc.id);
+            var index = $scope.docs.findIndex(existingDoc => existingDoc.id === doc.id);
             if (index !== -1) {
                 $scope.docs.splice(index, 1);
                 toastr.success('Document deleted successfully!');
@@ -99,4 +125,3 @@ angular.module('WebApp', ['ui.bootstrap', 'toastr'])
             toastr.info('Excel file downloaded successfully!');
         };
     });
-
