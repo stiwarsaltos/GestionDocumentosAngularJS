@@ -4,31 +4,8 @@
     <meta charset="UTF-8">
     <title>Document Management</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <style>
-        .modal-body table th, .modal-body table td {
-            text-align: center;
-        }
-        .loader {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            border: 16px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 16px solid #3498db;
-            width: 120px;
-            height: 120px;
-            animation: spin 5s linear infinite;
-            display: none;
-        }
-        .loader.show{
-            display:block;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-toastr/2.1.0/angular-toastr.min.css">
 </head>
 <body>
 <div class="container" ng-controller="DocumentController">
@@ -52,7 +29,7 @@
         <tbody>
         <tr ng-repeat="doc in docs | filter:searchText">
             <td>{{doc.date}}</td>
-            <td>{{doc.number}}</td>
+            <td>{{doc.num}}</td>
             <td>{{doc.client}}</td>
             <td>{{doc.quantityProducts}}</td>
             <td>{{doc.total | currency}}</td>
@@ -78,8 +55,8 @@
                     <input type="date" id="date" class="form-control" ng-model="newDocument.date">
                 </div>
                 <div class="form-group">
-                    <label for="number">Number</label>
-                    <input type="text" id="number" class="form-control"  ng-model="newDocument.number" >
+                    <label for="num">Number</label>
+                    <input type="text" id="num" class="form-control"  ng-model="newDocument.num" ng-blur="formatNumOnBlur()" maxlength="9">
                 </div>
                 <div class="form-group">
                     <label for="client">Client</label>
@@ -124,6 +101,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.6/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-toastr/2.1.0/angular-toastr.tpls.min.js"></script>
 <script src="controllers/controller.js"></script>
 <script src="controllers/modalController.js"></script>
 </body>
