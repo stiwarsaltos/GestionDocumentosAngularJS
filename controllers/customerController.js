@@ -1,13 +1,22 @@
 angular.module('WebApp')
-    .controller('CustomerController', function($scope, $uibModal, toastr) {
+    .controller('CustomerController', function($scope, $uibModal, toastr, $http) {
         $scope.customers = [];
         $scope.newCustomer = {};
         $scope.animationEnabled = true;
         $scope.isLoading = false;
 
-        function generateId() {
-            return $scope.customers.length > 0 ? Math.max($scope.customers.map(customer => customer.id)) + 1 : 1;
+        function fetchCustomers(){
+            $scope.isLoading = true;
+            $http.get('http://127.0.0.1:8000/api/customers').then(function(response) {
+                $scope.customers = response.data;
+                $scope.isLoading = false;
+            }, function(){
+                toastr.error('Failed to load customers.');
+                $scope.isLoading = false;
+            });
         }
+
+        fetchCustomers();
 
         $scope.openNewCustomerModal = function() {
             $scope.isLoading = true;
@@ -24,15 +33,17 @@ angular.module('WebApp')
 
             modalInstance.result.then(function(updatedCustomer) {
                 if (!updatedCustomer.id) {
-                    var existingCustom = $scope.customers.find(customer => customer.ident === updatedCustomer.ident);
+                    var existingCustom = $scope.customers.find(customer => customer.identify === updatedCustomer.identify);
                     if (existingCustom) {
                         toastr.error('Customer id already exists!');
                         $scope.isLoading = false;
                         return;
                     }
-                    updatedCustomer.id = generateId();
-                    $scope.customers.push(updatedCustomer);
-                    toastr.success('Customer created successfully!');
+                    $http.post('http://127.0.0.1:8000/api/customers', updatedCustomer).then(function(response) {
+                        $scope.customers.push(response.data);
+                        toastr.success('Customer created successfully!');
+                        $scope.isLoading = false;
+                    });
                 }
             }, function() {
                 $scope.isLoading = false;
@@ -53,23 +64,33 @@ angular.module('WebApp')
 
             modalInstance.result.then(function(updatedCustomer) {
                 $scope.isLoading = true;
-                var index = $scope.customers.findIndex(custom => custom.id === updatedCustomer.id);
-                if (index !== -1) {
-                    $scope.customers[index] = updatedCustomer;
-                    toastr.success('Customer updated successfully!');
-                }
-                $scope.isLoading = false;
+                $http.put('http://127.0.0.1:8000/api/customers' + updatedCustomer._id, updatedCustomer).then(function(response) {
+                    var index = $scope.customers.findIndex(existingCustom => existingCustom._id === updatedCustomer._id);
+                    if (index !== -1) {
+                        $scope.customers[index] = response.data;
+                        toastr.success('Customer updated successfully!');
+                    }
+                    $scope.isLoading = false;
+                }, function() {
+                    toastr.error('Failed to update customer.');
+                    $scope.isLoading = false;
+                });
             });
         };
 
         $scope.deleteCustomer = function(customer) {
             $scope.isLoading = true;
-            var index = $scope.customers.findIndex(existingDoc => existingDoc.id === customer.id);
-            if (index !== -1) {
-                $scope.customers.splice(index, 1);
-                toastr.success('Customer deleted successfully!');
-            }
-            $scope.isLoading = false;
+            $http.delete('http://127.0.0.1:8000/api/customers/' + customer._id).then(function() {
+                var index = $scope.customers.findIndex(existingCustom => existingCustom._id === customer._id);
+                if (index !== -1) {
+                    $scope.customers.splice(index, 1);
+                    toastr.success('Customer deleted successfully!');
+                }
+                $scope.isLoading = false;
+            }, function() {
+                toastr.error('Failed to delete customer.');
+                $scope.isLoading = false;
+            });
         };
 
         $scope.exportToExcel = function() {
@@ -79,7 +100,7 @@ angular.module('WebApp')
 
             $scope.customers.forEach(function(customer) {
                 var row = [];
-                row.push(customer.ident);
+                row.push(customer.identify);
                 row.push(customer.name);
                 row.push(customer.phone);
                 row.push(customer.email);

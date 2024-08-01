@@ -2,6 +2,10 @@ angular.module('WebApp')
     .controller('ModalController', function($scope, $uibModalInstance, newDocument, toastr) {
         $scope.newDocument = newDocument || { products: [] };
 
+        if (!Array.isArray($scope.newDocument.products)) {
+            $scope.newDocument.products = [];
+        }
+
         function formatNum(num) {
             return String(num).padStart(9, '0');
         }

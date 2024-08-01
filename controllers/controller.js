@@ -1,13 +1,22 @@
 angular.module('WebApp')
-    .controller('DocumentController', function($scope, $uibModal, toastr) {
+    .controller('DocumentController', function($scope, $uibModal, toastr, $http) {
         $scope.docs = [];
         $scope.newDocument = { products: [] };
         $scope.animationEnabled = true;
         $scope.isLoading = false;
 
-        function generateId() {
-            return $scope.docs.length > 0 ? Math.max($scope.docs.map(doc => doc.id)) + 1 : 1;
+        function fetchDocuments(){
+            $scope.isLoading = true;
+            $http.get('http://127.0.0.1:8000/api/documents').then(function(response) {
+                $scope.docs = response.data;
+                $scope.isLoading = false;
+            }, function(){
+                toastr.error('Failed to load documents.');
+                $scope.isLoading = false;
+            });
         }
+
+        fetchDocuments();
 
         $scope.openNewDocumentModal = function() {
             $scope.isLoading = true;
@@ -23,7 +32,8 @@ angular.module('WebApp')
             });
 
             modalInstance.result.then(function(updatedDocument) {
-                if (!updatedDocument.id) {
+                $scope.isLoading = true;
+                if (!updatedDocument._id) {
                     var existingDoc = $scope.docs.find(doc => doc.num === updatedDocument.num);
                     if (existingDoc) {
                         toastr.error('Document number already exists!');
@@ -31,17 +41,27 @@ angular.module('WebApp')
                         return;
                     }
 
-                    updatedDocument.id = generateId();
-                    $scope.docs.push(updatedDocument);
-                    toastr.success('Document created successfully!');
+                    $http.post('http://127.0.0.1:8000/api/documents', updatedDocument).then(function(response) {
+                        $scope.docs.push(response.data);
+                        toastr.success('Document created successfully!');
+                        $scope.isLoading = false;
+                    }, function() {
+                        toastr.error('Failed to create document.');
+                        $scope.isLoading = false;
+                    });
                 } else {
-                    var index = $scope.docs.findIndex(existingDoc => existingDoc.id === updatedDocument.id);
-                    if (index !== -1) {
-                        $scope.docs[index] = updatedDocument;
-                        toastr.success('Document updated successfully!');
-                    }
+                    $http.put('http://127.0.0.1:8000/api/documents/' + updatedDocument._id, updatedDocument).then(function(response) {
+                        var index = $scope.docs.findIndex(existingDoc => existingDoc._id === updatedDocument._id);
+                        if (index !== -1) {
+                            $scope.docs[index] = response.data;
+                            toastr.success('Document updated successfully!');
+                        }
+                        $scope.isLoading = false;
+                    }, function() {
+                        toastr.error('Failed to update document.');
+                        $scope.isLoading = false;
+                    });
                 }
-                $scope.isLoading = false;
             }, function() {
                 $scope.isLoading = false;
             });
@@ -61,23 +81,33 @@ angular.module('WebApp')
 
             modalInstance.result.then(function(updatedDocument) {
                 $scope.isLoading = true;
-                var index = $scope.docs.findIndex(existingDoc => existingDoc.id === updatedDocument.id);
-                if (index !== -1) {
-                    $scope.docs[index] = updatedDocument;
-                    toastr.success('Document updated successfully!');
-                }
-                $scope.isLoading = false;
+                $http.put('http://127.0.0.1:8000/api/documents/' + updatedDocument._id, updatedDocument).then(function(response) {
+                    var index = $scope.docs.findIndex(existingDoc => existingDoc._id === updatedDocument._id);
+                    if (index !== -1) {
+                        $scope.docs[index] = response.data;
+                        toastr.success('Document updated successfully!');
+                    }
+                    $scope.isLoading = false;
+                }, function() {
+                    toastr.error('Failed to update document.');
+                    $scope.isLoading = false;
+                });
             });
         };
 
-        $scope.deleteDocument = function(doc){
+        $scope.deleteDocument = function(doc) {
             $scope.isLoading = true;
-            var index = $scope.docs.findIndex(existingDoc => existingDoc.id === doc.id);
-            if (index !== -1) {
-                $scope.docs.splice(index, 1);
-                toastr.success('Document deleted successfully!');
-            }
-            $scope.isLoading = false;
+            $http.delete('http://127.0.0.1:8000/api/documents/' + doc._id).then(function() {
+                var index = $scope.docs.findIndex(existingDoc => existingDoc._id === doc._id);
+                if (index !== -1) {
+                    $scope.docs.splice(index, 1);
+                    toastr.success('Document deleted successfully!');
+                }
+                $scope.isLoading = false;
+            }, function() {
+                toastr.error('Failed to delete document.');
+                $scope.isLoading = false;
+            });
         };
 
         $scope.exportToExcel = function() {
