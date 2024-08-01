@@ -1,4 +1,63 @@
 <div class="container" ng-controller="CustomerController">
     <h2>Customer Management</h2>
-    <!-- Código para Customer Management aquí -->
+    <div class="form-inline">
+    <input type="text" class="form-control" ng-model="searchText" placeholder="Search...">
+    <button class="btn btn-primary" ng-click="openNewCustomerModal()">New Customer</button>
+    <button class="btn btn-success" ng-click="exportToExcel()">Download Excel</button>
+</div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Identification</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="customer in customers | filter:searchText">
+            <td>{{customer.ident}}</td>
+            <td>{{customer.name}}</td>
+            <td>{{customer.phone}}</td>
+            <td>{{customer.email}}</td>
+            <td>
+                <button class="btn btn-info" ng-click="editCustomer(customer)">Edit</button>
+                <button class="btn btn-danger" ng-click="deleteCustomer(customer)">Delete</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="loader" ng-class="{'show': isLoading}"></div>
+</div>
+
+<script type="text/ng-template" id="modalCustomer.html">
+    <div class="modal-header">
+        <h4 class="modal-title">Customer</h4>
+    </div>
+    <div class="modal-body">
+        <form name="documentForm">
+            <div class="form-group">
+                <label for="ident">Identification</label>
+                <input type="text" id="ident" class="form-control" ng-model="newCustomer.ident" minlength="10" maxlength="13">
+            </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" class="form-control" ng-model="newCustomer.name">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="text" id="phone" class="form-control" ng-model="newCustomer.phone" minlength="9" max="12">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" class="form-control" ng-model="newCustomer.email">
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="closeModal()">Close</button>
+        <button type="button" class="btn btn-primary" ng-click="saveCustomer()">Save</button>
+    </div>
+</script>
 </div>

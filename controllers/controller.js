@@ -1,26 +1,4 @@
-angular.module('WebApp', ['ui.bootstrap', 'toastr', 'ui.router'])
-    .config(function(toastrConfig){
-        angular.extend(toastrConfig, {
-            positionClass: 'toast-bottom-right',
-            timeOut: 3000,
-            progressBar: true,
-            preventDuplicates: false
-        });
-    })
-    .config(function($stateProvider, $urlRouterProvider) {
-        $stateProvider
-        .state('documents', {
-            url: '/documents',
-            templateUrl: 'views/documents.html',
-            controller: 'DocumentController',
-        })
-            .state('customers',{
-                url: '/customers',
-                templateUrl: 'views/customer.html',
-                controller: 'CustomerController',
-            });
-        $urlRouterProvider.otherwise('/documents');
-    })
+angular.module('WebApp')
     .controller('DocumentController', function($scope, $uibModal, toastr) {
         $scope.docs = [];
         $scope.newDocument = { products: [] };

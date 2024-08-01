@@ -29,7 +29,6 @@ angular.module('WebApp')
         };
 
         $scope.saveDocument = function() {
-            // Validar productos
             const hasEmptyProduct = $scope.newDocument.products.some(function(product) {
                 return !product.id || !product.name || !product.quantity || !product.unitPrice;
             });
@@ -38,7 +37,6 @@ angular.module('WebApp')
                 return;
             }
 
-            // Validar ID único
             const ids = $scope.newDocument.products.map(function(product) {
                 return product.id;
             });
