@@ -1,6 +1,7 @@
 angular.module('WebApp')
-    .controller('ModalController', function($scope, $uibModalInstance, newDocument, toastr) {
+    .controller('ModalController', function($scope, $uibModalInstance, $http, newDocument, toastr, customers) {
         $scope.newDocument = newDocument || { products: [] };
+        $scope.customers = customers;
 
         if (!Array.isArray($scope.newDocument.products)) {
             $scope.newDocument.products = [];
@@ -52,6 +53,11 @@ angular.module('WebApp')
 
             $scope.newDocument.quantityProducts = $scope.newDocument.products.length;
             $scope.newDocument.total = $scope.getTotalAmount();
+
+            if(!$scope.newDocument.client){
+                toastr.error('Please select a client');
+                return;
+            }
 
             $uibModalInstance.close($scope.newDocument);
         };

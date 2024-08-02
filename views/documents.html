@@ -5,6 +5,18 @@
         <button class="btn btn-primary" ng-click="openNewDocumentModal()">New Document</button>
         <button class="btn btn-success" ng-click="exportToExcel()">Download Excel</button>
     </div>
+    <br>
+    <div class="form-inline">
+        <div class="form-group">
+            <label for="startDate">From</label>
+            <input type="date" id="startDate" class="form-control" ng-model="filter.startDate">
+        </div>
+        <div class="form-group">
+            <label for="endDate">To</label>
+            <input type="date" id="endDate" class="form-control" ng-model="filter.endDate">
+        </div>
+        <button class="btn btn-primary" ng-click="filterByDate()">Filter</button>
+    </div>
     <table class="table table-striped">
         <thead>
         <tr>
@@ -17,10 +29,10 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="doc in docs | filter:searchText">
+        <tr ng-repeat="doc in filteredDocs | filter:searchText">
             <td>{{doc.date}}</td>
             <td>{{doc.num}}</td>
-            <td>{{doc.client}}</td>
+            <td>{{doc.client.name}}</td>
             <td>{{doc.quantityProducts}}</td>
             <td>{{doc.total | currency}}</td>
             <td>
@@ -48,8 +60,10 @@
                 <input type="text" id="num" class="form-control" ng-model="newDocument.num" ng-blur="formatNumOnBlur()" maxlength="9">
             </div>
             <div class="form-group">
-                <label for="client">Client</label>
-                <input type="text" id="client" class="form-control" ng-model="newDocument.client">
+                <label for="customer">Client</label>
+                <select id="customer" class="form-control" ng-model="newDocument.client" ng-options="customer._id as customer.name for customer in customers">
+                    <option value="">Select a Client</option>
+                </select>
             </div>
             <h4>Products</h4>
             <table class="table table-bordered">
