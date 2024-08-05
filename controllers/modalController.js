@@ -54,7 +54,7 @@ angular.module('WebApp')
             $scope.newDocument.quantityProducts = $scope.newDocument.products.length;
             $scope.newDocument.total = $scope.getTotalAmount();
 
-            if(!$scope.newDocument.client){
+            if (!$scope.newDocument.client_id) {
                 toastr.error('Please select a client');
                 return;
             }

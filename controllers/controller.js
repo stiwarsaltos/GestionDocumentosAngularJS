@@ -38,7 +38,7 @@ angular.module('WebApp')
                 var endDate = new Date($scope.filter.endDate);
 
                 if(startDate > endDate){
-                    alert('Le fecha inicio no puede ser mayor a la fecha de fin');
+                    alert('La fecha de inicio no puede ser mayor a la fecha de fin');
                     return ;
                 }
                 $scope.filteredDocs = $scope.docs.filter(function(doc){
@@ -81,8 +81,19 @@ angular.module('WebApp')
                         toastr.success('Document created successfully!');
                         $scope.isLoading = false;
                     }, function() {
-                        console.error('Error dateils: ', error.data);
                         toastr.error('Failed to create document.');
+                        $scope.isLoading = false;
+                    });
+                } else {
+                    $http.put('http://127.0.0.1:8000/api/documents/' + updatedDocument._id, updatedDocument).then(function(response) {
+                        var index = $scope.docs.findIndex(existingDoc => existingDoc._id === updatedDocument._id);
+                        if (index !== -1) {
+                            $scope.docs[index] = response.data;
+                            toastr.success('Document updated successfully!');
+                        }
+                        $scope.isLoading = false;
+                    }, function() {
+                        toastr.error('Failed to update document.');
                         $scope.isLoading = false;
                     });
                 }
@@ -108,8 +119,12 @@ angular.module('WebApp')
 
             modalInstance.result.then(function(updatedDocument) {
                 $scope.isLoading = true;
-                $http.put('http://127.0.0.1:8000/api/documents/' + updatedDocument._id, updatedDocument).then(function(response) {
-                    var index = $scope.docs.findIndex(existingDoc => existingDoc._id === updatedDocument._id);
+
+                updatedDocument.client_id = updatedDocument.client._id;
+                delete updatedDocument.client;
+
+                $http.put('http://127.0.0.1:8000/api/documents/' + updatedDocument.id, updatedDocument).then(function(response) {
+                    var index = $scope.docs.findIndex(existingDoc => existingDoc.id === updatedDocument.id);
                     if (index !== -1) {
                         $scope.docs[index] = response.data;
                         toastr.success('Document updated successfully!');
@@ -124,8 +139,8 @@ angular.module('WebApp')
 
         $scope.deleteDocument = function(doc) {
             $scope.isLoading = true;
-            $http.delete('http://127.0.0.1:8000/api/documents/' + doc._id).then(function() {
-                var index = $scope.docs.findIndex(existingDoc => existingDoc._id === doc._id);
+            $http.delete('http://127.0.0.1:8000/api/documents/' + doc.id).then(function() {
+                var index = $scope.docs.findIndex(existingDoc => existingDoc.id === doc.id);
                 if (index !== -1) {
                     $scope.docs.splice(index, 1);
                     toastr.success('Document deleted successfully!');
@@ -146,7 +161,7 @@ angular.module('WebApp')
                 var row = [];
                 row.push(doc.date);
                 row.push(doc.num);
-                row.push(doc.client);
+                row.push(doc.client.name);
                 row.push(doc.quantityProducts);
                 row.push(doc.total);
                 data.push(row);
