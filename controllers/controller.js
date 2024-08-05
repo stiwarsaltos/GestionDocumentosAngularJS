@@ -139,8 +139,8 @@ angular.module('WebApp')
 
         $scope.deleteDocument = function(doc) {
             $scope.isLoading = true;
-            $http.delete('http://127.0.0.1:8000/api/documents/' + doc.id).then(function() {
-                var index = $scope.docs.findIndex(existingDoc => existingDoc.id === doc.id);
+            $http.delete('http://127.0.0.1:8000/api/documents/' + doc._id).then(function() {
+                var index = $scope.docs.findIndex(existingDoc => existingDoc._id === doc._id);
                 if (index !== -1) {
                     $scope.docs.splice(index, 1);
                     toastr.success('Document deleted successfully!');
