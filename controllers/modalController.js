@@ -3,6 +3,10 @@ angular.module('WebApp')
         $scope.newDocument = newDocument || { products: [] };
         $scope.customers = customers;
 
+        if ($scope.newDocument.date && typeof $scope.newDocument.date === 'string') {
+            $scope.newDocument.date = new Date($scope.newDocument.date);
+        }
+
         if (!Array.isArray($scope.newDocument.products)) {
             $scope.newDocument.products = [];
         }
@@ -58,6 +62,14 @@ angular.module('WebApp')
                 toastr.error('Please select a client');
                 return;
             }
+
+            $scope.newDocument.products = $scope.newDocument.products.map(product => ({
+                id: product.id,
+                name: product.name,
+                quantity: product.quantity,
+                unitPrice: product.unitPrice,
+                total: product.total
+            }));
 
             $uibModalInstance.close($scope.newDocument);
         };

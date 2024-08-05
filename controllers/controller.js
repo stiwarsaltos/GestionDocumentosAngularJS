@@ -1,23 +1,27 @@
 angular.module('WebApp')
+    .filter('dateFormat', function () {
+        return function (input, format) {
+            if(!input) return '';
+            var date = new Date(input);
+            var options = {year:'numeric', month:'2-digit', day:'2-digit'};
+
+            return date.toLocaleDateString(undefined, options);
+        }
+    })
     .controller('DocumentController', function($scope, $uibModal, toastr, $http) {
         $scope.docs = [];
         $scope.customers = [];
         $scope.newDocument = { products: [] };
         $scope.animationEnabled = true;
         $scope.isLoading = false;
-        $scope.filter = {
-            startDate: null,
-            endDate: null
-        };
-        $scope.filteredDocs = [];
 
-        function fetchDocuments(){
+        function fetchDocuments() {
             $scope.isLoading = true;
             $http.get('http://127.0.0.1:8000/api/documents').then(function(response) {
                 $scope.docs = response.data;
-                $scope.filteredDocs = $scope.docs;
                 $scope.isLoading = false;
-            }, function(){
+            }, function(error) {
+                console.error('Failed to load documents:', error);
                 toastr.error('Failed to load documents.');
                 $scope.isLoading = false;
             });
@@ -25,30 +29,12 @@ angular.module('WebApp')
             $http.get('http://127.0.0.1:8000/api/customers').then(function(response) {
                 $scope.customers = response.data;
                 $scope.isLoading = false;
-            }, function (){
+            }, function() {
                 toastr.error('Failed to load customers.');
                 $scope.isLoading = false;
             });
         }
         fetchDocuments();
-
-        $scope.filterByDate = function() {
-            if($scope.filter.startDate && $scope.filter.endDate){
-                var startDate = new Date($scope.filter.startDate);
-                var endDate = new Date($scope.filter.endDate);
-
-                if(startDate > endDate){
-                    alert('La fecha de inicio no puede ser mayor a la fecha de fin');
-                    return ;
-                }
-                $scope.filteredDocs = $scope.docs.filter(function(doc){
-                    var docDate = new Date(doc.date);
-                    return docDate >= startDate && docDate <= endDate;
-                });
-            }else {
-                $scope.filteredDocs = $scope.docs;
-            }
-        };
 
         $scope.openNewDocumentModal = function() {
             $scope.isLoading = true;
@@ -60,7 +46,7 @@ angular.module('WebApp')
                     newDocument: function() {
                         return angular.copy($scope.newDocument);
                     },
-                    customers: function (){
+                    customers: function() {
                         return $scope.customers;
                     }
                 }
@@ -81,19 +67,8 @@ angular.module('WebApp')
                         toastr.success('Document created successfully!');
                         $scope.isLoading = false;
                     }, function() {
+                        console.log('Error: ', response);
                         toastr.error('Failed to create document.');
-                        $scope.isLoading = false;
-                    });
-                } else {
-                    $http.put('http://127.0.0.1:8000/api/documents/' + updatedDocument._id, updatedDocument).then(function(response) {
-                        var index = $scope.docs.findIndex(existingDoc => existingDoc._id === updatedDocument._id);
-                        if (index !== -1) {
-                            $scope.docs[index] = response.data;
-                            toastr.success('Document updated successfully!');
-                        }
-                        $scope.isLoading = false;
-                    }, function() {
-                        toastr.error('Failed to update document.');
                         $scope.isLoading = false;
                     });
                 }
@@ -102,7 +77,7 @@ angular.module('WebApp')
             });
         };
 
-        $scope.editDocument = function(doc){
+        $scope.editDocument = function(doc) {
             var modalInstance = $uibModal.open({
                 animation: $scope.animationEnabled,
                 templateUrl: 'modalTemplate.html',
@@ -111,7 +86,7 @@ angular.module('WebApp')
                     newDocument: function() {
                         return angular.copy(doc);
                     },
-                    customers: function (){
+                    customers: function() {
                         return $scope.customers;
                     }
                 }
@@ -123,8 +98,8 @@ angular.module('WebApp')
                 updatedDocument.client_id = updatedDocument.client._id;
                 delete updatedDocument.client;
 
-                $http.put('http://127.0.0.1:8000/api/documents/' + updatedDocument.id, updatedDocument).then(function(response) {
-                    var index = $scope.docs.findIndex(existingDoc => existingDoc.id === updatedDocument.id);
+                $http.put('http://127.0.0.1:8000/api/documents/' + updatedDocument._id, updatedDocument).then(function(response) {
+                    var index = $scope.docs.findIndex(existingDoc => existingDoc._id === updatedDocument._id);
                     if (index !== -1) {
                         $scope.docs[index] = response.data;
                         toastr.success('Document updated successfully!');

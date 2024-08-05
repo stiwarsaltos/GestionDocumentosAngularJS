@@ -18,6 +18,11 @@ angular.module('WebApp', ['ui.bootstrap', 'toastr', 'ui.router'])
                 url: '/customers',
                 templateUrl: 'views/customer.html',
                 controller: 'CustomerController',
+            })
+            .state('resume',{
+                url: '/resume',
+                templateUrl: 'views/resume.html',
+                controller: 'ResumeController',
             });
         $urlRouterProvider.otherwise('/documents');
     });
